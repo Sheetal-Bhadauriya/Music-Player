@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web Music Player</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background: #f0f0f0;
+        }
+        .player {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 300px;
+        }
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 10px;
+        }
+        .playlist {
+            margin-top: 20px;
+        }
+        .playlist-item {
+            padding: 5px;
+            cursor: pointer;
+        }
+        .playlist-item:hover {
+            background: #ddd;
+        }
+        .search-bar {
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="player">
+        <div class="now-playing">
+            <strong>Now Playing:</strong>
+            <span id="current-track">None</span>
+        </div>
+        <div class="controls">
+            <button id="prev">Prev</button>
+            <button id="play-pause">Play</button>
+            <button id="next">Next</button>
+            <input type="range" id="volume" min="0" max="1" step="0.1" value="1">
+        </div>
+        <div class="search-bar">
+            <input type="text" id="search" placeholder="Search...">
+        </div>
+        <div class="playlist" id="playlist"></div>
+    </div>
+    
+    <script>
+        const tracks = [
+            { id: 1, title: "Song 1", category: "Pop", url: "song1.mp3" },
+            { id: 2, title: "Song 2", category: "Rock", url: "song2.mp3" },
+            { id: 3, title: "Song 3", category: "Jazz", url: "song3.mp3" },
+        ];
+
+        let currentTrackIndex = 0;
+        let isPlaying = false;
+
+        const audio = new Audio();
+        const playPauseButton = document.getElementById('play-pause');
+        const prevButton = document.getElementById('prev');
+        const nextButton = document.getElementById('next');
+        const volumeControl = document.getElementById('volume');
+        const currentTrackElement = document.getElementById('current-track');
+        const playlistElement = document.getElementById('playlist');
+        const searchInput = document.getElementById('search');
+
+        function loadTrack(index) {
+            const track = tracks[index];
+            audio.src = track.url;
+            currentTrackElement.textContent = track.title;
+            audio.load();
+        }
+
+        function playTrack() {
+            audio.play();
+            isPlaying = true;
+            playPauseButton.textContent = 'Pause';
+        }
+
+        function pauseTrack() {
+            audio.pause();
+            isPlaying = false;
+            playPauseButton.textContent = 'Play';
+        }
+
+        playPauseButton.addEventListener('click', () => {
+            if (isPlaying) {
+                pauseTrack();
+            } else {
+                playTrack();
+            }
+        });
+
+        prevButton.addEventListener('click', () => {
+            currentTrackIndex = (currentTrackIndex - 1 + tracks.length) % tracks.length;
+            loadTrack(currentTrackIndex);
+            playTrack();
+        });
+
+        nextButton.addEventListener('click', () => {
+            currentTrackIndex = (currentTrackIndex + 1) % tracks.length;
+            loadTrack(currentTrackIndex);
+            playTrack();
+        });
+
+        volumeControl.addEventListener('input', () => {
+            audio.volume = volumeControl.value;
+        });
+
+        searchInput.addEventListener('input', () => {
+            const searchQuery = searchInput.value.toLowerCase();
+            displayPlaylist(tracks.filter(track => track.title.toLowerCase().includes(searchQuery)));
+        });
+
+        function displayPlaylist(tracksToDisplay) {
+            playlistElement.innerHTML = '';
+            tracksToDisplay.forEach((track, index) => {
+                const trackElement = document.createElement('div');
+                trackElement.className = 'playlist-item';
+                trackElement.textContent = `${track.title} (${track.category})`;
+                trackElement.addEventListener('click', () => {
+                    currentTrackIndex = index;
+                    loadTrack(currentTrackIndex);
+                    playTrack();
+                });
+                playlistElement.appendChild(trackElement);
+            });
+        }
+
+        // Initialize
+        loadTrack(currentTrackIndex);
+        displayPlaylist(tracks);
+    </script>
+</body>
+</html>
